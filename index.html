@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>JR Cloud Terminal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="terminal-container">
+        <div class="status-bar">JR 系统内核 v3.1 | 节点: CF官方优选1</div>
+        <div class="input-area">
+            <input type="text" id="target_url" placeholder="输入要访问的网址 (例如: https://www.google.com)">
+            <button onclick="launchProxy()">启动隧道</button>
+        </div>
+        <div id="console">系统就绪，等待指令...</div>
+        <div class="view-window">
+            <iframe id="proxy_frame" src="about:blank"></iframe>
+        </div>
+    </div>
+    <script src="vless_core.js"></script>
+</body>
+</html>
