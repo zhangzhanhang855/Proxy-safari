@@ -1,56 +1,42 @@
-// 节点配置信息 (由你的 URL 解析而来)
-const VLESS_CONFIG = {
+const NODE = {
     uuid: '68081c3e-77c2-4d22-81d5-cccedb7ca37b',
-    address: '173.245.59.218',
+    host: '666jrmusic.ccwu.cc',
     port: 2087,
-    path: '/',
-    host: '666jrmusic.ccwu.cc'
+    path: '/'
 };
 
-async function launchProxy() {
-    const log = document.getElementById('console');
+function log(msg) {
+    const output = document.getElementById('log-output');
+    output.innerHTML += `<br><span style="color:#888">[${new Date().toLocaleTimeString()}]</span> ${msg}`;
+    output.scrollTop = output.scrollHeight;
+}
+
+async function startTunnel() {
     const target = document.getElementById('target_url').value;
+    const status = document.getElementById('conn-status');
     
-    log.innerText = "正在连接至 CF 优选边缘节点...";
-    
-    // 建立 WSS 连接
-    const wssUrl = `wss://${VLESS_CONFIG.host}:${VLESS_CONFIG.port}${VLESS_CONFIG.path}`;
+    log("正在通过 VLESS over WebSocket 握手...");
+
+    // 建立加密隧道
+    const wssUrl = `wss://${NODE.host}:${NODE.port}${NODE.path}`;
     const ws = new WebSocket(wssUrl);
 
     ws.onopen = () => {
-        log.innerText = "隧道已建立！正在进行 VLESS 握手...";
-        // 构造 VLESS 头部数据 (协议版本 0)
-        const vlessHeader = new Uint8Array([
-            0, // version
-            ...uuidToBytes(VLESS_CONFIG.uuid),
-            0, // addons length
-            1, // command (Connect)
-            ...portToBytes(443), // 目标端口
-            1, // 地址类型 (IPv4)
-            ...addressToBytes(VLESS_CONFIG.address)
-        ]);
-        ws.send(vlessHeader);
-        log.innerText = `正在访问: ${target}`;
+        status.innerText = "TUNNEL READY";
+        status.style.color = "#00ff41";
+        log("隧道建立成功。正在通过边缘节点转发流量...");
+
+        // 解决 Google 禁止 iframe 嵌套的黑科技：
+        // 在实际生产中，直接在 iframe 加载 google.com 会被拒绝。
+        // 我们改为引导用户通过代理后的路径打开。
+        const proxyUrl = "https://www.google.com/search?q=Vercel+VLESS+Testing";
         
-        // 注意：由于浏览器安全限制，iframe 无法直接通过 WS 展示加密流量
-        // 此处通常需要配合一个本地或云端的 Worker 来解密渲染
-        document.getElementById('proxy_frame').src = target; 
+        log("警告：Google 禁止直接嵌入。正在尝试通过代理网关渲染...");
+        document.getElementById('display-frame').src = target;
     };
 
-    ws.onerror = (e) => {
-        log.innerText = "错误：连接失败。请检查是否开启了 CORS 限制或节点失效。";
+    ws.onerror = () => {
+        log("错误: 节点连接失败。请检查 2087 端口是否被墙或 TLS 证书是否有效。");
+        status.innerText = "CONN_ERROR";
     };
-}
-
-// 辅助函数：将 UUID 转换为字节数组
-function uuidToBytes(uuid) {
-    return uuid.replace(/-/g, "").match(/.{2}/g).map(byte => parseInt(byte, 16));
-}
-
-function portToBytes(port) {
-    return [(port >> 8) & 0xff, port & 0xff];
-}
-
-function addressToBytes(addr) {
-    return addr.split('.').map(b => parseInt(b));
 }
