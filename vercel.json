@@ -1,18 +1,18 @@
 {
   "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/proxy",
+      "destination": "https://666jrmusic.ccwu.cc:2087/"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self' 'unsafe-inline' 'unsafe-eval' wss: https: data:;" }
+        { "key": "Content-Security-Policy", "value": "default-src 'self' 'unsafe-inline' 'unsafe-eval' wss: https: data:; frame-src *;" }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/node-link",
-      "destination": "https://173.245.59.218:2087/"
     }
   ]
 }
